@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { authApi } from '../api/auth';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 
@@ -43,7 +44,30 @@ export const Register: React.FC = () => {
       
       const token = localStorage.getItem('authToken');
       if (token) {
-        navigate('/', { replace: true });
+        // Проверяем isActive после регистрации
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const payload = JSON.parse(jsonPayload);
+        const isActive = payload.isActive !== false;
+        
+        // Если не активен, отправляем код верификации и редиректим
+        if (!isActive) {
+          try {
+            await authApi.sendVerificationCode(email);
+          } catch (err) {
+            console.error('Failed to send verification code:', err);
+            // Не показываем ошибку пользователю, он сможет переотправить на странице верификации
+          }
+          navigate('/verify-email', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
       } else {
         setError(t('errors.registerFailed'));
       }

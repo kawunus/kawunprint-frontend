@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from './hooks/useAuth';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { VerifyEmail } from './pages/VerifyEmail';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { Orders } from './pages/Orders';
 import { OrderDetail } from './pages/OrderDetail';
 import { CreateOrder } from './pages/CreateOrder';
@@ -11,7 +13,7 @@ import { LandingPage } from './pages/LandingPage';
 import { Header } from './components/layout/Header';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isActive, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -23,6 +25,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
+  }
+
+  // Если пользователь не активен, редиректим на страницу верификации
+  if (!isActive) {
+    return <Navigate to="/verify-email" />;
   }
 
   return <>{children}</>;
@@ -37,6 +44,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route
             path="/orders"
             element={

@@ -8,6 +8,8 @@ interface UseAuthReturn {
   isClient: boolean;
   userRole: string | null;
   userName: string | null;
+  userEmail: string | null;
+  isActive: boolean;
   login: (credentials: LoginRequest) => Promise<string>;
   register: (data: RegisterRequest) => Promise<string>;
   logout: () => void;
@@ -19,6 +21,8 @@ export const useAuth = (): UseAuthReturn => {
   const [isClient, setIsClient] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const checkAuth = useCallback(() => {
@@ -29,16 +33,22 @@ export const useAuth = (): UseAuthReturn => {
       const role = userInfo?.role?.toUpperCase();
       const userIsClient = role === 'CLIENT';
       const full = userInfo?.full || `${userInfo?.firstName || ''} ${userInfo?.lastName || ''}`.trim();
+      const email = userInfo?.email || null;
+      const active = userInfo?.isActive !== false; // По умолчанию true если не указано
       
       setIsAuthenticated(true);
       setIsClient(userIsClient);
       setUserRole(role || null);
       setUserName(full || null);
+      setUserEmail(email);
+      setIsActive(active);
     } else {
       setIsAuthenticated(false);
       setIsClient(false);
       setUserRole(null);
       setUserName(null);
+      setUserEmail(null);
+      setIsActive(true);
     }
     
     setIsLoading(false);
@@ -80,11 +90,15 @@ export const useAuth = (): UseAuthReturn => {
       const role = userInfo?.role?.toUpperCase();
       const userIsClient = role === 'CLIENT';
       const full = userInfo?.full || `${userInfo?.firstName || ''} ${userInfo?.lastName || ''}`.trim();
+      const email = userInfo?.email || null;
+      const active = userInfo?.isActive !== false;
       
       setIsAuthenticated(true);
       setIsClient(userIsClient);
       setUserRole(role || null);
       setUserName(full || null);
+      setUserEmail(email);
+      setIsActive(active);
       
       console.log('🔑 useAuth: Auth state updated, isAuthenticated: true');
       
@@ -98,6 +112,8 @@ export const useAuth = (): UseAuthReturn => {
       setIsClient(false);
       setUserRole(null);
       setUserName(null);
+      setUserEmail(null);
+      setIsActive(true);
       throw error;
     }
   }, []);
@@ -111,11 +127,15 @@ export const useAuth = (): UseAuthReturn => {
       const role = userInfo?.role?.toUpperCase();
       const userIsClient = role === 'CLIENT';
       const full = userInfo?.full || `${userInfo?.firstName || ''} ${userInfo?.lastName || ''}`.trim();
+      const email = userInfo?.email || null;
+      const active = userInfo?.isActive !== false;
       
       setIsAuthenticated(true);
       setIsClient(userIsClient);
       setUserRole(role || null);
       setUserName(full || null);
+      setUserEmail(email);
+      setIsActive(active);
       
       // Отправляем кастомное событие для обновления Header
       window.dispatchEvent(new Event('authChange'));
@@ -126,6 +146,8 @@ export const useAuth = (): UseAuthReturn => {
       setIsClient(false);
       setUserRole(null);
       setUserName(null);
+      setUserEmail(null);
+      setIsActive(true);
       throw error;
     }
   }, []);
@@ -136,6 +158,8 @@ export const useAuth = (): UseAuthReturn => {
     setIsClient(false);
     setUserRole(null);
     setUserName(null);
+    setUserEmail(null);
+    setIsActive(true);
     // Отправляем кастомное событие для обновления Header
     window.dispatchEvent(new Event('authChange'));
     window.location.href = '/login';
@@ -146,6 +170,8 @@ export const useAuth = (): UseAuthReturn => {
     isClient,
     userRole,
     userName,
+    userEmail,
+    isActive,
     login,
     register,
     logout,

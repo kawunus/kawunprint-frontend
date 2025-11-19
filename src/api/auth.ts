@@ -67,4 +67,29 @@ export const authApi = {
   logout: () => {
     localStorage.removeItem('authToken');
   },
+
+  sendVerificationCode: async (email: string): Promise<void> => {
+    await api.post('/api/v1/send-verification-code', { email });
+  },
+
+  verifyEmail: async (email: string, code: string): Promise<string> => {
+    const response = await api.post('/api/v1/verify-email', { email, code });
+    
+    // Возвращаем токен в том же формате что и login
+    if (response.data.message) {
+      return response.data.message;
+    } else if (response.data.data) {
+      return response.data.data;
+    } else if (response.data.token) {
+      return response.data.token;
+    } else if (typeof response.data === 'string') {
+      return response.data;
+    } else {
+      throw new Error('Unexpected response format from server');
+    }
+  },
+
+  resetPassword: async (email: string): Promise<void> => {
+    await api.post('/api/v1/reset-password', { email });
+  },
 };

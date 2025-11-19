@@ -27,7 +27,7 @@ export const Login: React.FC = () => {
       
       const token = localStorage.getItem('authToken');
       if (token) {
-        // Проверяем роль пользователя
+        // Проверяем роль пользователя и isActive
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(
@@ -38,10 +38,17 @@ export const Login: React.FC = () => {
         );
         const payload = JSON.parse(jsonPayload);
         const role = payload.role?.toUpperCase();
+        const isActive = payload.isActive !== false; // По умолчанию true
         
         // Если роль не CLIENT, редиректим на админку
         if (role && role !== 'CLIENT') {
           window.location.href = 'http://localhost:3000';
+          return;
+        }
+        
+        // Если пользователь не активен, редиректим на верификацию email
+        if (!isActive) {
+          navigate('/verify-email', { replace: true });
           return;
         }
         
@@ -104,6 +111,15 @@ export const Login: React.FC = () => {
             >
               {t('login.submit')}
             </Button>
+          </div>
+
+          <div className="text-center">
+            <Link
+              to="/forgot-password"
+              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+            >
+              {t('login.forgotPassword')}
+            </Link>
           </div>
         </form>
       </div>
